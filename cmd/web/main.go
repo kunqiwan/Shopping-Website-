@@ -5,6 +5,7 @@ import (
 	"github.com/KQW/my_page/pkg/config"
 	"github.com/KQW/my_page/pkg/handlers"
 	"github.com/KQW/my_page/pkg/render"
+	"log"
 	"net/http"
 )
 
@@ -24,8 +25,18 @@ func main() {
 	handlers.NewHandler(repo)
 	render.NewTemplates(&app)
 	// the http package will automatically pass the http.ResponseWriter and *http.Request arguments
-	http.HandleFunc("/", handlers.Repo.Home)
-	http.HandleFunc("/about", handlers.Repo.AboutPage)
+	//http.HandleFunc("/", handlers.Repo.Home)
+	//http.HandleFunc("/about", handlers.Repo.AboutPage)
 	fmt.Println("Starting apllication on port %s", portNumber)
-	_ = http.ListenAndServe(portNumber, nil)
+	//_ = http.ListenAndServe(portNumber, nil)
+	fmt.Println("paole srv")
+	srv := &http.Server{
+		Addr:    portNumber,
+		Handler: routes(&app),
+	}
+	fmt.Println("paole handler")
+	err = srv.ListenAndServe()
+	if err != nil {
+		log.Fatal(err)
+	}
 }
