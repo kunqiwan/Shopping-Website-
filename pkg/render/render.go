@@ -3,42 +3,45 @@ package render
 import (
 	"bytes"
 	"fmt"
+	"github.com/KQW/my_page/pkg/config"
 	"html/template"
 	"log"
 	"net/http"
 	"path/filepath"
 )
 
-// RenderTemplate renders a template
+var app *config.AppConfig
+
+func NewTemplates(a *config.AppConfig) {
+	app = a
+}
+
+// RenderTemplate renders templates
 func RenderTemplate(w http.ResponseWriter, tmpl string) {
-	//create template cache
-	fmt.Println("this is pass 5")
-	tc, err := createTemplateCache()
-	if err != nil {
-		log.Fatal(err)
-	}
+	//in main method, we create cache,and save it in appConfig Struct,just call it there
+	tc := app.TemplateCache
 	//get requested template from the cache
 	t, ok := tc[tmpl]
 	if !ok {
-		log.Fatal(err)
+		log.Fatal("err in template parsing")
 	}
 	//create buffer to capture the output of the executed template
-	fmt.Println("this is pass 6")
 	buf := new(bytes.Buffer)
-	err = t.Execute(buf, nil)
+	//causes the template to be executed with no additional data, and the output is written to the buffer
+	err := t.Execute(buf, nil)
 	if err != nil {
 		log.Println(err)
 	}
-	fmt.Println("this is pass 77")
 	//render the template
+	//the contents of the buffer are written to the HTTP response using the WriteTo() method
 	_, err = buf.WriteTo(w)
 	if err != nil {
 		log.Println(err)
 	}
-	fmt.Println("this is pass 8")
 }
 
-func createTemplateCache() (map[string]*template.Template, error) {
+func CreateTemplateCache() (map[string]*template.Template, error) {
+	//create a map,key is the name of page,value is the template
 	myCache := map[string]*template.Template{}
 	//get all files which named *.page.tmpl from ./templates
 	//files.Glob will base on the filepath,find the file that has specific name, it will return a slice
@@ -47,7 +50,6 @@ func createTemplateCache() (map[string]*template.Template, error) {
 		return myCache, err
 	}
 	//range through all files ending with*.page.tmpl
-	fmt.Println("this is pass 1")
 	fmt.Println("pages:", pages)
 	for _, page := range pages {
 		//Base function will return the page name after ./templates/
@@ -65,14 +67,14 @@ func createTemplateCache() (map[string]*template.Template, error) {
 		}
 		if len(matches) > 0 {
 			//parse all the base.layout.tmpl files and add them to the template set
+			//a template set is a collection of related templates
+			//a text-based format that can include placeholders for dynamic data
 			ts, err = ts.ParseGlob("./templates/*.layout.tmpl")
 			if err != nil {
 				return myCache, err
 			}
 		}
 		myCache[name] = ts
-		fmt.Println("this is pass 3")
 	}
-	fmt.Println("this is pass 4")
 	return myCache, nil
 }
