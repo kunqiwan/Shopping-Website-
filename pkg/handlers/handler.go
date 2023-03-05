@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"github.com/KQW/my_page/pkg/config"
+	"github.com/KQW/my_page/pkg/models"
 	"github.com/KQW/my_page/pkg/render"
 	"net/http"
 )
@@ -27,8 +28,13 @@ func NewHandler(r *Repository) {
 }
 
 func (m *Repository) Home(w http.ResponseWriter, r *http.Request) {
-	render.RenderTemplate(w, "home.page.tmpl")
+	render.RenderTemplate(w, "home.page.tmpl", &models.TemplateData{})
 }
 func (m *Repository) AboutPage(w http.ResponseWriter, r *http.Request) {
-	render.RenderTemplate(w, "about.page.tmpl")
+	smap := make(map[string]string)
+	smap["test"] = "Good Night"
+	//pass data there ,and get data in corresponding tmpl
+	render.RenderTemplate(w, "about.page.tmpl", &models.TemplateData{
+		StringMap: smap,
+	})
 }

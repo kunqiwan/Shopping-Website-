@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"fmt"
 	"github.com/KQW/my_page/pkg/config"
+	"github.com/KQW/my_page/pkg/models"
 	"html/template"
 	"log"
 	"net/http"
@@ -17,7 +18,7 @@ func NewTemplates(a *config.AppConfig) {
 }
 
 // RenderTemplate renders templates
-func RenderTemplate(w http.ResponseWriter, tmpl string) {
+func RenderTemplate(w http.ResponseWriter, tmpl string, td *models.TemplateData) {
 	//in main method, we create cache,and save it in appConfig Struct,just call it there
 	tc := app.TemplateCache
 	//get requested template from the cache
@@ -28,7 +29,8 @@ func RenderTemplate(w http.ResponseWriter, tmpl string) {
 	//create buffer to capture the output of the executed template
 	buf := new(bytes.Buffer)
 	//causes the template to be executed with no additional data, and the output is written to the buffer
-	err := t.Execute(buf, nil)
+	//pass the template data to the buffer
+	err := t.Execute(buf, td)
 	if err != nil {
 		log.Println(err)
 	}
